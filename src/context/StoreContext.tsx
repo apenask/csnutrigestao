@@ -83,7 +83,6 @@ function storeReducer(state: StoreState, action: StoreAction): StoreState {
       return { ...state, cashFlow: state.cashFlow.filter(f => f.id !== action.payload) };
     case 'UPDATE_CONFIG':
       return { ...state, config: { ...state.config, ...action.payload } };
-    // Lógica do carrinho permanece local
     case 'ADD_TO_CART': {
         const existingItem = state.cart.find(item => item.product.id === action.payload.id);
         if (existingItem) {
@@ -115,9 +114,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           supabase.from('cash_flow').select('*').order('date', { ascending: false }),
         ]);
 
-        if (productsRes.error || salesRes.error || cashFlowRes.error) {
-          throw new Error(productsRes.error?.message || salesRes.error?.message || cashFlowRes.error?.message);
-        }
+        if (productsRes.error) throw productsRes.error;
+        if (salesRes.error) throw salesRes.error;
+        if (cashFlowRes.error) throw cashFlowRes.error;
         
         const savedConfig = localStorage.getItem('csNutriConfig');
         const config = savedConfig ? JSON.parse(savedConfig) : initialState.config;
@@ -146,17 +145,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   
   const addProduct = async (productData: Omit<Product, 'id' | 'sku_number'>, imageFile?: File | null) => {
     let finalImageUrl = productData.image || '';
-
     if (imageFile) {
       const fileName = `${Date.now()}_${imageFile.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('product-images').upload(fileName, imageFile);
+      const { data: uploadData, error: uploadError } = await supabase.storage.from('product-images').upload(fileName, imageFile);
       if (uploadError) throw uploadError;
       const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(uploadData.path);
       finalImageUrl = urlData.publicUrl;
     }
     
-    const productToInsert = { ...productData, image_url: finalImageUrl };
+    const { installmentPrice, ...rest } = productData;
+    const productToInsert = { ...rest, installment_price: installmentPrice, image_url: finalImageUrl, };
     delete (productToInsert as any).image;
 
     const { data: newProduct, error } = await supabase.from('products').insert(productToInsert).select().single();
@@ -166,7 +164,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const updateProduct = async (productData: Product, imageFile?: File | null) => {
     let finalImageUrl = productData.image || '';
-
     if (imageFile) {
         const fileName = `${Date.now()}_${imageFile.name}`;
         const { data: uploadData, error: uploadError } = await supabase.storage.from('product-images').upload(fileName, imageFile);
@@ -175,8 +172,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         finalImageUrl = urlData.publicUrl;
     }
 
-    const { id, sku_number, ...restOfData } = productData;
-    const productToUpdate = { ...restOfData, image_url: finalImageUrl };
+    const { id, sku_number, installmentPrice, ...restOfData } = productData;
+    const productToUpdate = { ...restOfData, installment_price: installmentPrice, image_url: finalImageUrl };
     delete (productToUpdate as any).image;
     
     const { data: updatedProduct, error } = await supabase.from('products').update(productToUpdate).eq('id', id).select().single();
@@ -191,11 +188,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
   
   const addSale = async (saleData: Omit<Sale, 'id'| 'date'>) => {
-    const saleToInsert = { ...saleData, date: new Date().toISOString() };
+    const { items, ...saleDetails } = saleData;
+    const saleToInsert = { ...saleDetails, date: new Date().toISOString(), id: Date.now().toString() };
+
     const { data: newSale, error } = await supabase.from('sales').insert(saleToInsert).select().single();
     if (error) throw error;
 
-    const saleItemsToInsert = saleData.items.map(item => ({
+    const saleItemsToInsert = items.map(item => ({
       sale_id: newSale.id,
       product_id: item.product.id,
       quantity: item.quantity,
@@ -215,7 +214,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addCashFlow = async (cashFlowData: Omit<CashFlow, 'id' | 'date'>) => {
-    const entryToInsert = { ...cashFlowData, date: new Date().toISOString() };
+    const entryToInsert = { ...cashFlowData, id: Date.now().toString(), date: new Date().toISOString() };
     const { data: newEntry, error } = await supabase.from('cash_flow').insert(entryToInsert).select().single();
     if (error) throw error;
     dispatch({ type: 'ADD_CASH_FLOW', payload: newEntry });
@@ -232,16 +231,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const contextValue: StoreContextType = {
-    state,
-    dispatch,
-    addProduct,
-    updateProduct,
-    deleteProduct,
-    addSale,
-    deleteSale,
-    addCashFlow,
-    deleteCashFlow,
-    updateConfig
+    state, dispatch, addProduct, updateProduct, deleteProduct,
+    addSale, deleteSale, addCashFlow, deleteCashFlow, updateConfig
   };
 
   return (
