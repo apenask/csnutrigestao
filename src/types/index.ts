@@ -1,7 +1,9 @@
 export interface Product {
   id: string;
+  sku_number: number; // <-- ADICIONE ESTA LINHA
   name: string;
   price: number;
+  installmentPrice?: number;
   category: string;
   stock: number;
   image?: string;
@@ -18,6 +20,7 @@ export interface Sale {
   items: CartItem[];
   total: number;
   paymentMethod: 'cash' | 'card' | 'pix';
+  cardType?: 'debit' | 'credit';
 }
 
 export interface CashFlow {

@@ -20,6 +20,22 @@ export function isThisMonth(date: string | Date): boolean {
   return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
 }
 
+// NOVA FUNÇÃO ADICIONADA
+export function isThisWeek(date: string | Date): boolean {
+  const d = new Date(date);
+  const today = new Date();
+  const firstDayOfWeek = today.getDate() - today.getDay();
+  const lastDayOfWeek = firstDayOfWeek + 6;
+
+  const startOfWeek = new Date(today.setDate(firstDayOfWeek));
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  const endOfWeek = new Date(today.setDate(lastDayOfWeek));
+  endOfWeek.setHours(23, 59, 59, 999);
+
+  return d >= startOfWeek && d <= endOfWeek;
+}
+
 export function getLast7Days(): Date[] {
   const days = [];
   for (let i = 6; i >= 0; i--) {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Plus, Minus, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { Modal } from '../components/Modal';
@@ -20,7 +20,6 @@ export function Caixa() {
 
   const handleAddEntry = (type: 'income' | 'expense') => {
     if (!description.trim() || !amount) return;
-
     const entry = {
       id: Date.now().toString(),
       date: new Date().toISOString(),
@@ -28,7 +27,6 @@ export function Caixa() {
       type,
       amount: parseFloat(amount)
     };
-
     dispatch({ type: 'ADD_CASH_FLOW', payload: entry });
     setDescription('');
     setAmount('');
@@ -54,7 +52,7 @@ export function Caixa() {
       case 'expense':
         return <TrendingDown size={16} className="text-red-600" />;
       case 'sale':
-        return <TrendingUp size={16} style={{ color: 'var(--accent-red)' }} />;
+        return <TrendingUp size={16} className="text-green-600" />;
       default:
         return null;
     }
@@ -62,143 +60,103 @@ export function Caixa() {
 
   const getFlowTypeLabel = (type: string) => {
     switch (type) {
-      case 'income':
-        return 'Entrada';
-      case 'expense':
-        return 'Saída';
-      case 'sale':
-        return 'Venda';
-      default:
-        return type;
+      case 'income': return 'Entrada';
+      case 'expense': return 'Saída';
+      case 'sale': return 'Venda';
+      default: return type;
     }
   };
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-          Caixa
-        </h1>
-        <p style={{ color: 'var(--text-secondary)' }}>
-          Controle seu fluxo de caixa
-        </p>
+        <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Caixa</h1>
+        <p style={{ color: 'var(--text-secondary)' }}>Controle seu fluxo de caixa</p>
       </div>
 
-      {/* Balance Card */}
       <div className="card rounded-xl p-8 text-center">
-        <h2 className="text-lg font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
-          Saldo Atual do Caixa
-        </h2>
-        <p className={`text-4xl font-bold mb-6 ${
-          cashBalance >= 0 ? 'text-green-600' : 'text-red-600'
-        }`}>
+        <h2 className="text-lg font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>Saldo Atual do Caixa</h2>
+        <p className={`text-4xl font-bold mb-6 ${cashBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
           {formatCurrency(cashBalance)}
         </p>
-        
         <div className="flex justify-center space-x-4">
-          <button
-            onClick={() => setShowEntryModal(true)}
-            className="btn-success px-6 py-3 rounded-lg font-semibold hover-lift flex items-center"
-          >
+          <button onClick={() => setShowEntryModal(true)} className="btn-success px-6 py-3 rounded-lg font-semibold hover-lift flex items-center">
             <Plus size={20} className="mr-2" />
             Lançar Entrada
           </button>
-          <button
-            onClick={() => setShowExpenseModal(true)}
-            className="btn-warning px-6 py-3 rounded-lg font-semibold hover-lift flex items-center"
-          >
+          <button onClick={() => setShowExpenseModal(true)} className="btn-warning px-6 py-3 rounded-lg font-semibold hover-lift flex items-center">
             <Minus size={20} className="mr-2" />
             Lançar Saída
           </button>
         </div>
       </div>
 
-      {/* Transactions Table */}
       <div className="card rounded-xl p-6">
-        <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
-          Histórico de Transações
-        </h3>
-        
+        <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Histórico de Transações</h3>
         {state.cashFlow.length === 0 ? (
           <div className="text-center py-8">
-            <p style={{ color: 'var(--text-muted)' }}>
-              Nenhuma transação registrada
-            </p>
+            <p style={{ color: 'var(--text-muted)' }}>Nenhuma transação registrada</p>
           </div>
         ) : (
           <>
-            {/* Desktop Table */}
-            <div className="overflow-x-auto mobile-table">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b" style={{ borderColor: 'var(--border-primary)' }}>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-secondary)' }}>
-                      Data/Hora
-                    </th>
-                    <th className="text-left py-3 px-4 font-medium" style={{ color: 'var(--text-secondary)' }}>
-                      Descrição
-                    </th>
-                    <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-secondary)' }}>
-                      Tipo
-                    </th>
-                    <th className="text-right py-3 px-4 font-medium" style={{ color: 'var(--text-secondary)' }}>
-                      Valor
-                    </th>
-                    <th className="text-center py-3 px-4 font-medium" style={{ color: 'var(--text-secondary)' }}>
-                      Ações
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {state.cashFlow.map((flow) => (
-                    <tr 
-                      key={flow.id} 
-                      className="border-b hover:bg-opacity-50 hover:bg-gray-100"
-                      style={{ borderColor: 'var(--border-secondary)' }}
-                    >
-                      <td className="py-3 px-4" style={{ color: 'var(--text-primary)' }}>
-                        {formatDateTime(flow.date)}
-                      </td>
-                      <td className="py-3 px-4" style={{ color: 'var(--text-primary)' }}>
-                        {flow.description}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <div className="flex items-center justify-center space-x-1">
-                          {getFlowTypeIcon(flow.type)}
-                          <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                            {getFlowTypeLabel(flow.type)}
-                          </span>
-                        </div>
-                      </td>
-                      <td className={`py-3 px-4 text-right font-semibold ${
-                        flow.type === 'expense' ? 'text-red-600' : 'text-green-600'
-                      }`}>
-                        {flow.type === 'expense' ? '-' : '+'}{formatCurrency(flow.amount)}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        {flow.type !== 'sale' && (
-                          <button
-                            onClick={() => handleDeleteEntry(flow.id)}
-                            className="p-2 rounded-lg hover:bg-red-50 text-red-500 hover:text-red-700"
-                            title="Excluir lançamento"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        )}
-                      </td>
+            {/* Tabela para desktop */}
+            <div className="hidden md:block">
+              <div className="overflow-x-auto w-full">
+                <table className="w-full text-sm text-left min-w-full">
+                  <thead className="border-b" style={{ borderColor: 'var(--border-primary)' }}>
+                    <tr>
+                      <th className="py-3 px-4 font-medium whitespace-nowrap" style={{ color: 'var(--text-secondary)' }}>Data/Hora</th>
+                      <th className="py-3 px-4 font-medium" style={{ color: 'var(--text-secondary)' }}>Descrição</th>
+                      <th className="text-center py-3 px-4 font-medium whitespace-nowrap" style={{ color: 'var(--text-secondary)' }}>Tipo</th>
+                      <th className="text-right py-3 px-4 font-medium whitespace-nowrap" style={{ color: 'var(--text-secondary)' }}>Valor</th>
+                      <th className="text-center py-3 px-4 font-medium whitespace-nowrap" style={{ color: 'var(--text-secondary)' }}>Ações</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y" style={{ borderColor: 'var(--border-secondary)' }}>
+                    {state.cashFlow.map((flow) => (
+                      <tr key={flow.id} className="hover:bg-opacity-50" data-theme={state.config.theme === 'dark' ? 'dark' : 'light'}>
+                        <td className="py-3 px-4 whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>
+                          {formatDateTime(flow.date)}
+                        </td>
+                        <td className="py-3 px-4" style={{ color: 'var(--text-primary)' }}>
+                          {flow.description}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <div className="flex items-center justify-center space-x-1">
+                            {getFlowTypeIcon(flow.type)}
+                            <span className="text-sm whitespace-nowrap" style={{ color: 'var(--text-secondary)' }}>
+                              {getFlowTypeLabel(flow.type)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className={`py-3 px-4 text-right font-semibold whitespace-nowrap ${flow.type === 'expense' ? 'text-red-600' : 'text-green-600'}`}>
+                          {flow.type === 'expense' ? '-' : '+'}{formatCurrency(flow.amount)}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          {flow.type !== 'sale' && (
+                            <button 
+                              onClick={() => handleDeleteEntry(flow.id)} 
+                              className="p-2 rounded-lg hover:bg-red-100 text-red-500" 
+                              title="Excluir lançamento"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-            {/* Mobile Cards */}
-            <div className="mobile-cards space-y-4">
+            {/* Cards para mobile */}
+            <div className="block md:hidden space-y-4">
               {state.cashFlow.map((flow) => (
                 <div key={flow.id} className="card-secondary rounded-lg p-4">
                   <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate" style={{ color: 'var(--text-primary)' }}>
                         {flow.description}
                       </p>
                       <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
@@ -206,9 +164,9 @@ export function Caixa() {
                       </p>
                     </div>
                     {flow.type !== 'sale' && (
-                      <button
-                        onClick={() => handleDeleteEntry(flow.id)}
-                        className="p-2 rounded-lg hover:bg-red-50 text-red-500 hover:text-red-700"
+                      <button 
+                        onClick={() => handleDeleteEntry(flow.id)} 
+                        className="p-2 rounded-lg text-red-500 flex-shrink-0 ml-2"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -221,9 +179,7 @@ export function Caixa() {
                         {getFlowTypeLabel(flow.type)}
                       </span>
                     </div>
-                    <span className={`font-semibold ${
-                      flow.type === 'expense' ? 'text-red-600' : 'text-green-600'
-                    }`}>
+                    <span className={`font-semibold ${flow.type === 'expense' ? 'text-red-600' : 'text-green-600'}`}>
                       {flow.type === 'expense' ? '-' : '+'}{formatCurrency(flow.amount)}
                     </span>
                   </div>
@@ -234,27 +190,22 @@ export function Caixa() {
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
-      <ConfirmModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={confirmDeleteEntry}
-        title="Excluir Lançamento"
-        message="Tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita."
-        confirmText="Excluir"
-        cancelText="Cancelar"
-        type="danger"
+      {/* Modals */}
+      <ConfirmModal 
+        isOpen={showDeleteModal} 
+        onClose={() => setShowDeleteModal(false)} 
+        onConfirm={confirmDeleteEntry} 
+        title="Excluir Lançamento" 
+        message="Tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita." 
+        confirmText="Excluir" 
+        cancelText="Cancelar" 
+        type="danger" 
       />
-
-      {/* Entry Modal */}
-      <Modal
-        isOpen={showEntryModal}
-        onClose={() => {
-          setShowEntryModal(false);
-          setDescription('');
-          setAmount('');
-        }}
-        title="Lançar Entrada"
+      
+      <Modal 
+        isOpen={showEntryModal} 
+        onClose={() => { setShowEntryModal(false); setDescription(''); setAmount(''); }} 
+        title="Lançar Entrada" 
         size="md"
       >
         <div className="space-y-4">
@@ -262,45 +213,39 @@ export function Caixa() {
             <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
               Descrição
             </label>
-            <input
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Ex: Aporte de capital, Recebimento de cliente..."
-              className="w-full px-4 py-2 rounded-lg input-field"
+            <input 
+              type="text" 
+              value={description} 
+              onChange={(e) => setDescription(e.target.value)} 
+              placeholder="Ex: Aporte de capital..." 
+              className="w-full px-4 py-2 rounded-lg input-field" 
             />
           </div>
-          
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
               Valor
             </label>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0,00"
-              step="0.01"
-              min="0"
-              className="w-full px-4 py-2 rounded-lg input-field"
+            <input 
+              type="number" 
+              value={amount} 
+              onChange={(e) => setAmount(e.target.value)} 
+              placeholder="0,00" 
+              step="0.01" 
+              min="0" 
+              className="w-full px-4 py-2 rounded-lg input-field" 
             />
           </div>
-
           <div className="flex space-x-4 pt-4">
-            <button
-              onClick={() => {
-                setShowEntryModal(false);
-                setDescription('');
-                setAmount('');
-              }}
-              className="flex-1 px-4 py-2 rounded-lg border hover-lift"
+            <button 
+              onClick={() => { setShowEntryModal(false); setDescription(''); setAmount(''); }} 
+              className="flex-1 px-4 py-2 rounded-lg border hover-lift" 
               style={{ borderColor: 'var(--border-primary)', color: 'var(--text-secondary)' }}
             >
               Cancelar
             </button>
-            <button
-              onClick={() => handleAddEntry('income')}
-              disabled={!description.trim() || !amount}
+            <button 
+              onClick={() => handleAddEntry('income')} 
+              disabled={!description.trim() || !amount} 
               className="flex-1 btn-success py-2 rounded-lg font-semibold hover-lift disabled:opacity-50"
             >
               Registrar Entrada
@@ -308,16 +253,11 @@ export function Caixa() {
           </div>
         </div>
       </Modal>
-
-      {/* Expense Modal */}
-      <Modal
-        isOpen={showExpenseModal}
-        onClose={() => {
-          setShowExpenseModal(false);
-          setDescription('');
-          setAmount('');
-        }}
-        title="Lançar Saída"
+      
+      <Modal 
+        isOpen={showExpenseModal} 
+        onClose={() => { setShowExpenseModal(false); setDescription(''); setAmount(''); }} 
+        title="Lançar Saída" 
         size="md"
       >
         <div className="space-y-4">
@@ -325,45 +265,39 @@ export function Caixa() {
             <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
               Descrição
             </label>
-            <input
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Ex: Pagamento de aluguel, Compra de estoque..."
-              className="w-full px-4 py-2 rounded-lg input-field"
+            <input 
+              type="text" 
+              value={description} 
+              onChange={(e) => setDescription(e.target.value)} 
+              placeholder="Ex: Pagamento de aluguel..." 
+              className="w-full px-4 py-2 rounded-lg input-field" 
             />
           </div>
-          
           <div>
             <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
               Valor
             </label>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0,00"
-              step="0.01"
-              min="0"
-              className="w-full px-4 py-2 rounded-lg input-field"
+            <input 
+              type="number" 
+              value={amount} 
+              onChange={(e) => setAmount(e.target.value)} 
+              placeholder="0,00" 
+              step="0.01" 
+              min="0" 
+              className="w-full px-4 py-2 rounded-lg input-field" 
             />
           </div>
-
           <div className="flex space-x-4 pt-4">
-            <button
-              onClick={() => {
-                setShowExpenseModal(false);
-                setDescription('');
-                setAmount('');
-              }}
-              className="flex-1 px-4 py-2 rounded-lg border hover-lift"
+            <button 
+              onClick={() => { setShowExpenseModal(false); setDescription(''); setAmount(''); }} 
+              className="flex-1 px-4 py-2 rounded-lg border hover-lift" 
               style={{ borderColor: 'var(--border-primary)', color: 'var(--text-secondary)' }}
             >
               Cancelar
             </button>
-            <button
-              onClick={() => handleAddEntry('expense')}
-              disabled={!description.trim() || !amount}
+            <button 
+              onClick={() => handleAddEntry('expense')} 
+              disabled={!description.trim() || !amount} 
               className="flex-1 btn-warning py-2 rounded-lg font-semibold hover-lift disabled:opacity-50"
             >
               Registrar Saída

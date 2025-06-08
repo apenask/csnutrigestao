@@ -24,44 +24,54 @@ export function Layout({ children, currentPage, onPageChange, onLogout }: Layout
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-      {/* Mobile menu button */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
+      {/* ========================================================== */}
+      {/* CÓDIGO CORRIGIDO ABAIXO */}
+      {/* ========================================================== */}
+      <div className={`lg:hidden fixed top-4 left-4 z-50 transition-opacity duration-300 ${
+          sidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
+      >
         <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
+          onClick={() => setSidebarOpen(true)}
           className="p-2 rounded-lg card hover-lift"
         >
-          {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+          <Menu size={24} />
         </button>
       </div>
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-40 w-64 transform transition-transform lg:translate-x-0 ${
+      <div className={`fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-300 lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="h-full card" style={{ backgroundColor: 'var(--bg-primary)' }}>
-          <div className="p-6">
-            <div className="flex items-center mb-2">
-              {state.config.logo && (
-                <div className="w-10 h-10 mr-3 rounded-lg overflow-hidden">
-                  <img
-                    src={state.config.logo}
-                    alt="Logo"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
-              <div>
-                <h1 className="text-2xl font-bold gradient-bg-red bg-clip-text text-transparent">
-                  {state.config.name}
-                </h1>
-                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                  Sistema de Gestão
-                </p>
-              </div>
+        <div className="h-full flex flex-col card relative" style={{ backgroundColor: 'var(--bg-primary)' }}>
+          
+          <div className="lg:hidden absolute top-4 right-4 z-50">
+             <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2 rounded-lg hover:bg-opacity-50"
+              >
+                <X size={24} style={{color: 'var(--text-secondary)'}}/>
+              </button>
+          </div>
+          
+          <div className="p-4 h-24 flex items-center gap-3">
+            {state.config.logo && (
+              <img 
+                src={state.config.logo} 
+                alt="Logo CS Nutri" 
+                className="h-10 w-10 object-contain"
+              />
+            )}
+            <div className="flex flex-col">
+              <h1 
+                className="text-lg font-bold leading-tight" 
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {state.config.name}
+              </h1>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                Sistema de Gestão
+              </p>
             </div>
           </div>
           
@@ -94,11 +104,10 @@ export function Layout({ children, currentPage, onPageChange, onLogout }: Layout
             })}
           </nav>
 
-          {/* Logout Button */}
-          <div className="p-4">
+          <div className="p-4 mt-auto">
             <button
               onClick={onLogout}
-              className="w-full flex items-center px-4 py-3 rounded-lg transition-all hover:bg-red-50 hover:text-red-600"
+              className="w-full flex items-center px-4 py-3 rounded-lg transition-all hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/50 dark:hover:text-red-400"
               style={{ color: 'var(--text-muted)' }}
             >
               <LogOut size={20} className="mr-3" />
@@ -118,7 +127,7 @@ export function Layout({ children, currentPage, onPageChange, onLogout }: Layout
 
       {/* Main content */}
       <div className="lg:ml-64 min-h-screen">
-        <main className="p-4 lg:p-8">
+        <main className="p-4 pt-20 lg:p-8">
           {children}
         </main>
       </div>

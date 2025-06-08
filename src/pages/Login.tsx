@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Store, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 
 interface LoginProps {
@@ -29,27 +29,24 @@ export function Login({ onLogin }: LoginProps) {
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-secondary)' }}>
       <div className="w-full max-w-md">
         <div className="card rounded-2xl p-8 text-center animate-fade-in">
-          {/* Logo */}
-          <div className="mb-8">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full gradient-bg-red flex items-center justify-center overflow-hidden">
-              {state.config.logo ? (
-                <img
-                  src={state.config.logo}
-                  alt="Logo CS Nutri"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    target.nextElementSibling?.classList.remove('hidden');
-                  }}
-                />
-              ) : null}
-              <Store size={40} className={`text-white ${state.config.logo ? 'hidden' : ''}`} />
-            </div>
-            <h1 className="text-3xl font-bold gradient-bg-red bg-clip-text text-transparent">
-              {state.config.name}
-            </h1>
-            <p className="text-sm mt-2" style={{ color: 'var(--text-muted)' }}>
+          
+          {/* LOGO SECTION - CÓDIGO MODIFICADO ABAIXO */}
+          <div className="mb-8 flex flex-col items-center">
+            {state.config.logo ? (
+              <img 
+                src={state.config.logo} 
+                alt="Logo CS Nutri" 
+                className="h-24 w-auto mb-4" 
+              />
+            ) : (
+              <h1 
+                className="text-3xl font-bold mb-4" 
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {state.config.name}
+              </h1>
+            )}
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
               Sistema de Gestão
             </p>
           </div>
