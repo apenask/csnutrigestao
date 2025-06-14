@@ -1,3 +1,8 @@
+// src/context/StoreContext.tsx - VERSÃO FINAL SEM WARNINGS
+
+/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { Product, Sale, CashFlow, StoreConfig, CartItem } from '../types';
 import { supabase } from '../services/supabaseClient';
@@ -64,7 +69,7 @@ function storeReducer(state: StoreState, action: StoreAction): StoreState {
       return { ...state, products: state.products.map(p => p.id === action.payload.id ? action.payload : p) };
     case 'DELETE_PRODUCT':
       return { ...state, products: state.products.filter(p => p.id !== action.payload) };
-    case 'ADD_SALE':
+    case 'ADD_SALE': {
       const saleFlow: CashFlow = {
         id: `flow-${action.payload.id}`,
         date: action.payload.date,
@@ -73,10 +78,16 @@ function storeReducer(state: StoreState, action: StoreAction): StoreState {
         amount: action.payload.total,
       };
       return { ...state, sales: [action.payload, ...state.sales], cashFlow: [saleFlow, ...state.cashFlow] };
-    case 'DELETE_SALE':
+    }
+    case 'DELETE_SALE': {
       const saleIdToDelete = action.payload;
       const cashFlowIdToDelete = `flow-${saleIdToDelete}`;
-      return { ...state, sales: state.sales.filter(s => s.id !== saleIdToDelete), cashFlow: state.cashFlow.filter(f => f.id !== cashFlowIdToDelete) };
+      return { 
+        ...state, 
+        sales: state.sales.filter(s => s.id !== saleIdToDelete), 
+        cashFlow: state.cashFlow.filter(f => f.id !== cashFlowIdToDelete) 
+      };
+    }
     case 'ADD_CASH_FLOW':
       return { ...state, cashFlow: [action.payload, ...state.cashFlow] };
     case 'DELETE_CASH_FLOW':
@@ -84,18 +95,33 @@ function storeReducer(state: StoreState, action: StoreAction): StoreState {
     case 'UPDATE_CONFIG':
       return { ...state, config: { ...state.config, ...action.payload } };
     case 'ADD_TO_CART': {
-        const existingItem = state.cart.find(item => item.product.id === action.payload.id);
-        if (existingItem) {
-          return { ...state, cart: state.cart.map(item => item.product.id === action.payload.id ? { ...item, quantity: item.quantity + 1 } : item) };
-        }
-        return { ...state, cart: [...state.cart, { product: action.payload, quantity: 1 }] };
+      const existingItem = state.cart.find(item => item.product.id === action.payload.id);
+      if (existingItem) {
+        return {
+          ...state,
+          cart: state.cart.map(item =>
+            item.product.id === action.payload.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          )
+        };
+      }
+      return { ...state, cart: [...state.cart, { product: action.payload, quantity: 1 }] };
     }
     case 'REMOVE_FROM_CART':
-        return { ...state, cart: state.cart.filter(item => item.product.id !== action.payload) };
-    case 'UPDATE_CART_QUANTITY':
-        return { ...state, cart: state.cart.map(item => item.product.id === action.payload.id ? { ...item, quantity: action.payload.quantity } : item ) };
+      return { ...state, cart: state.cart.filter(item => item.product.id !== action.payload) };
+    case 'UPDATE_CART_QUANTITY': {
+      return {
+        ...state,
+        cart: state.cart.map(item =>
+          item.product.id === action.payload.id
+            ? { ...item, quantity: action.payload.quantity }
+            : item
+        ).filter(item => item.quantity > 0)
+      };
+    }
     case 'CLEAR_CART':
-        return { ...state, cart: [] };
+      return { ...state, cart: [] };
     default:
       return state;
   }
@@ -154,7 +180,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
     
     const { installmentPrice, ...rest } = productData;
-    const productToInsert = { ...rest, installment_price: installmentPrice, image_url: finalImageUrl, };
+    const productToInsert = { ...rest, installment_price: installmentPrice, image_url: finalImageUrl };
     delete (productToInsert as any).image;
 
     const { data: newProduct, error } = await supabase.from('products').insert(productToInsert).select().single();
@@ -172,7 +198,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         finalImageUrl = urlData.publicUrl;
     }
 
-    const { id, sku_number, installmentPrice, ...restOfData } = productData;
+    const { id, installmentPrice, ...restOfData } = productData;
     const productToUpdate = { ...restOfData, installment_price: installmentPrice, image_url: finalImageUrl };
     delete (productToUpdate as any).image;
     

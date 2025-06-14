@@ -1,6 +1,9 @@
+// src/types/index.ts - ADICIONAR ESTAS INTERFACES AO FINAL DO SEU ARQUIVO EXISTENTE
+
+// ===== INTERFACES EXISTENTES (manter como estão) =====
 export interface Product {
   id: string;
-  sku_number: number; // <-- ADICIONE ESTA LINHA
+  sku_number: number;
   name: string;
   price: number;
   installmentPrice?: number;
@@ -35,4 +38,33 @@ export interface StoreConfig {
   name: string;
   logo?: string;
   theme: 'light' | 'dark';
+}
+
+// ===== ADICIONAR ESTAS NOVAS INTERFACES =====
+
+// Interfaces para autenticação
+export interface User {
+  id: string;
+  email: string;
+  createdAt: string;
+}
+
+export type Theme = 'light' | 'dark';
+
+export interface AuthUser extends User {
+  emailConfirmed?: boolean;
+  lastSignIn?: string;
+  loginMethod?: 'code' | 'email';
+}
+
+export interface AuthError {
+  message: string;
+  code?: string;
+}
+
+// Interface para estado de autenticação
+export interface AuthState {
+  isAuthenticated: boolean;
+  user: AuthUser | null;
+  loading: boolean;
 }

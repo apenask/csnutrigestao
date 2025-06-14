@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+// src/App.tsx - VERSÃO FINAL SEM WARNINGS
+
+import { useState } from 'react';
 import { StoreProvider } from './context/StoreContext';
+import { ThemeManager } from './components/ThemeManager';
 import { Login } from './pages/Login';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
@@ -9,7 +12,10 @@ import { Vendas } from './pages/Vendas';
 import { Produtos } from './pages/Produtos';
 import { Configuracoes } from './pages/Configuracoes';
 
-function App() {
+// IMPORTANTE: Adicionar esta linha para importar os temas
+import './styles/themes.css';
+
+function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
 
@@ -42,7 +48,7 @@ function App() {
   };
 
   return (
-    <StoreProvider>
+    <>
       {!isAuthenticated ? (
         <Login onLogin={handleLogin} />
       ) : (
@@ -54,6 +60,16 @@ function App() {
           {renderPage()}
         </Layout>
       )}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <StoreProvider>
+      <ThemeManager>
+        <AppContent />
+      </ThemeManager>
     </StoreProvider>
   );
 }
