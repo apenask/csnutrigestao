@@ -1,8 +1,3 @@
-// src/context/StoreContext.tsx - VERSÃO FINAL SEM WARNINGS
-
-/* eslint-disable react-refresh/only-export-components */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { Product, Sale, CashFlow, StoreConfig, CartItem } from '../types';
 import { supabase } from '../services/supabaseClient';

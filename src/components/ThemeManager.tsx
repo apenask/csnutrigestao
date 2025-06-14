@@ -1,5 +1,3 @@
-// src/components/ThemeManager.tsx - VERSÃO CORRIGIDA SEM WARNINGS
-
 import { useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 

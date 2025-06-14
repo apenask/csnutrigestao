@@ -1,76 +1,60 @@
-// src/App.tsx - VERSÃO FINAL SEM WARNINGS
-
-import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import { StoreProvider } from './context/StoreContext';
 import { ThemeManager } from './components/ThemeManager';
-import { Login } from './pages/Login';
-import { Layout } from './components/Layout';
-import { Dashboard } from './pages/Dashboard';
-import { PDV } from './pages/PDV';
-import { Caixa } from './pages/Caixa';
-import { Vendas } from './pages/Vendas';
-import { Produtos } from './pages/Produtos';
-import { Configuracoes } from './pages/Configuracoes';
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from './components/Login';
+import Signup from './components/Signup';
+import Navbar from './components/Navbar';
+import Dashboard from './components/Dashboard';
+import Products from './components/Products';
+import Sales from './components/Sales';
+import CashFlow from './components/CashFlow';
+import Settings from './components/Settings';
 
-// IMPORTANTE: Adicionar esta linha para importar os temas
-import './styles/themes.css';
-
-function AppContent() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentPage, setCurrentPage] = useState('dashboard');
-
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-  };
-
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setCurrentPage('dashboard');
-  };
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'dashboard':
-        return <Dashboard />;
-      case 'pdv':
-        return <PDV />;
-      case 'caixa':
-        return <Caixa />;
-      case 'vendas':
-        return <Vendas />;
-      case 'produtos':
-        return <Produtos />;
-      case 'configuracoes':
-        return <Configuracoes />;
-      default:
-        return <Dashboard />;
-    }
-  };
-
+// Layout para rotas protegidas
+function ProtectedLayout() {
   return (
-    <>
-      {!isAuthenticated ? (
-        <Login onLogin={handleLogin} />
-      ) : (
-        <Layout 
-          currentPage={currentPage} 
-          onPageChange={setCurrentPage}
-          onLogout={handleLogout}
-        >
-          {renderPage()}
-        </Layout>
-      )}
-    </>
+    <ProtectedRoute>
+      <StoreProvider>
+        <div className="min-h-screen bg-gray-50">
+          <Navbar />
+          <main>
+            <Outlet />
+          </main>
+        </div>
+      </StoreProvider>
+    </ProtectedRoute>
   );
 }
 
 function App() {
   return (
-    <StoreProvider>
-      <ThemeManager>
-        <AppContent />
-      </ThemeManager>
-    </StoreProvider>
+    <Router>
+      <AuthProvider>
+        <StoreProvider>
+          <ThemeManager>
+            <Routes>
+              {/* Rotas públicas */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+
+              {/* Rotas protegidas */}
+              <Route element={<ProtectedLayout />}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/sales" element={<Sales />} />
+                <Route path="/cash-flow" element={<CashFlow />} />
+                <Route path="/settings" element={<Settings />} />
+              </Route>
+
+              {/* Redireciona rotas não encontradas */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </ThemeManager>
+        </StoreProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

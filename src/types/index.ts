@@ -1,6 +1,6 @@
-// src/types/index.ts - ADICIONAR ESTAS INTERFACES AO FINAL DO SEU ARQUIVO EXISTENTE
+// src/types/index.ts
 
-// ===== INTERFACES EXISTENTES (manter como estão) =====
+// ===== INTERFACES DE PRODUTOS E VENDAS =====
 export interface Product {
   id: string;
   sku_number: number;
@@ -32,17 +32,19 @@ export interface CashFlow {
   description: string;
   type: 'income' | 'expense' | 'sale';
   amount: number;
+  category?: string; // Propriedade opcional adicionada
 }
 
 export interface StoreConfig {
   name: string;
+  storeName?: string; // Para compatibilidade
   logo?: string;
   theme: 'light' | 'dark';
+  currency?: string;
+  lowStockAlert?: boolean;
 }
 
-// ===== ADICIONAR ESTAS NOVAS INTERFACES =====
-
-// Interfaces para autenticação
+// ===== INTERFACES DE AUTENTICAÇÃO =====
 export interface User {
   id: string;
   email: string;
@@ -62,7 +64,6 @@ export interface AuthError {
   code?: string;
 }
 
-// Interface para estado de autenticação
 export interface AuthState {
   isAuthenticated: boolean;
   user: AuthUser | null;
